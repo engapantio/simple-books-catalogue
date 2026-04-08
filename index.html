@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/simple-books-catalogue/assets/book.svg" />
+  <meta name="description" content="Search millions of books and save your favorites." />
+  <title>Simple Books Catalogue</title>
+  <script type="module" crossorigin src="/simple-books-catalogue/assets/main.js"></script>
+  <link rel="stylesheet" crossorigin href="/simple-books-catalogue/assets/main.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__inner wrapper">
+
+      <a class="header__brand" href="." aria-label="The Library — home">
+        <div class="header__logo" aria-hidden="true">
+          <img src="/simple-books-catalogue/assets/book.svg" alt="" width="24" height="24" />
+        </div>
+        <div class="header__brand-text">
+          <span class="header__brand-name">The Library</span>
+          <span class="header__brand-tagline">Discover your next favorite book</span>
+        </div>
+      </a>
+
+      <div class="header__actions">
+        <!-- Mobile: show/hide favorites panel -->
+        <button class="fav-mobile-btn" id="favMobileBtn"
+                aria-label="Show favorites" aria-expanded="false">
+          <img src="/simple-books-catalogue/assets/heart.svg" alt="" width="16" height="16"
+               aria-hidden="true" />
+          <span class="fav-mobile-btn__badge" id="favBadge">0</span>
+        </button>
+
+        <!-- Light / dark toggle -->
+        <button class="theme-btn" id="themeBtn" aria-label="Switch to dark theme">
+          <span class="theme-btn__icon" aria-hidden="true">☀️</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO / SEARCH -->
+  <section class="hero" aria-labelledby="heroHeading">
+    <div class="wrapper">
+      <h1 class="hero__title" id="heroHeading">Discover Your Next Great Read</h1>
+      <p class="hero__subtitle">
+        Search millions of books, build your personal library,
+        and never lose track of what to read next.
+      </p>
+
+      <div class="search-bar" role="search">
+        <img class="search-bar__icon" src="/simple-books-catalogue/assets/search.svg"
+             alt="" aria-hidden="true" width="20" height="20" />
+        <input
+          type="search"
+          id="searchInput"
+          class="search-bar__input"
+          placeholder="Search by title, author or keyword…"
+          aria-label="Search for books"
+          autocomplete="off"
+        />
+        <button class="search-bar__btn" id="searchBtn" type="button">Search</button>
+      </div>
+
+      <!-- Author filter — revealed after first search -->
+      <div class="author-filter" id="authorFilter" hidden>
+        <label for="authorInput" class="author-filter__label">Filter by author:</label>
+        <input
+          type="text"
+          id="authorInput"
+          class="author-filter__input"
+          placeholder="e.g. Rowling"
+          aria-label="Filter results by author"
+          autocomplete="off"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <div class="wrapper">
+      <div class="content-layout">
+
+        <!-- Search results -->
+        <section class="results" id="results"
+                 aria-label="Search results"
+                 aria-live="polite" aria-atomic="false">
+          <div class="state-msg" id="stateMsg" role="status"></div>
+          <ul class="books-grid" id="booksGrid"></ul>
+        </section>
+
+        <!-- Favorites sidebar -->
+        <aside class="favorites" id="favoritesSidebar" aria-label="Favorites">
+          <div class="favorites__panel">
+            <div class="favorites__header">
+              <img src="/simple-books-catalogue/assets/heart.svg" alt="" aria-hidden="true"
+                   class="favorites__header-icon" width="16" height="16" />
+              <h2 class="favorites__title">Favorites</h2>
+            </div>
+            <p class="favorites__count" id="favCount">0 books saved</p>
+            <ul class="favorites__list" id="favoritesList"
+                aria-label="Favorited books"></ul>
+            <p class="favorites__empty" id="favEmpty">
+              No favorites yet.<br />Click the heart on any book to save it.
+            </p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="wrapper footer__inner">
+      Powered by
+      <a href="https://openlibrary.org" target="_blank"
+         rel="noopener noreferrer">Open Library</a>
+    </div>
+  </footer>
+
+</body>
+</html>
