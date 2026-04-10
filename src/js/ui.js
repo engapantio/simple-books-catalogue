@@ -9,8 +9,8 @@
 import { getCoverUrl } from './api.js';
 import { isFavorite } from './storage.js';
 
-import heartIconUrl from '../assets/heart.svg';
 import bookIconUrl from '../assets/book.svg';
+import heartUrl from '../assets/heart.svg';
 
 /* ================================================================
   HELPERS
@@ -30,6 +30,19 @@ export function escapeHtml(str) {
     .replace(/>/g,  '&gt;')
     .replace(/"/g,  '&quot;')
     .replace(/'/g,  '&#39;');
+}
+
+/**
+ * Favorites sidebar title icon: green stroke-only heart (`#heart-outline` uses currentColor).
+ * Caller sets this on `.favorites__header-mark` once at startup.
+ *
+ * @returns {string}
+ */
+export function favoritesHeaderMarkInnerHTML() {
+  return `
+    <svg class="favorites__header-heart" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <use href="${heartUrl}#heart-outline" width="16" height="16" />
+    </svg>`;
 }
 
 /* ================================================================
@@ -92,14 +105,12 @@ export function bookCardHTML(book) {
           aria-pressed="${fav}"
           aria-label="${fav ? 'Remove from favorites' : 'Add to favorites'}"
         >
-          <svg
-            class="heart-icon"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <use href="${heartIconUrl}"></use>
-          </svg>
+          <span class="book-card__fav-graphic" aria-hidden="true">
+            <img class="book-card__fav-img" src="${heartUrl}" width="16" height="16" alt="" />
+            <svg class="book-card__fav-svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <use href="${heartUrl}#heart-filled" width="16" height="16" />
+            </svg>
+          </span>
         </button>
       </div>
       <div class="book-card__info">
@@ -116,7 +127,7 @@ export function bookCardHTML(book) {
 
 /**
  * Build the HTML string for one entry in the Favorites sidebar list.
- * Callers append the string; event delegation in favorites.js handles remove clicks.
+ * Callers append the string; favorites.js binds clicks on `.fav-item__heart`.
  *
  * @param {Object} book  — Saved book object (same shape as API doc).
  * @returns {string}     — <li class="fav-item"> … </li>
@@ -148,22 +159,17 @@ export function favoriteItemHTML(book) {
         ${year ? `<p class="fav-item__year">${year}</p>` : 'Unknown'}
       </div>
 
-          <button
-          class="fav-item__remove"
-          type="button"
-          data-key="${key}"
-          aria-pressed="true"
-          aria-label="Remove &quot;${title}&quot; from favorites"
-        >
-          <svg
-            class="heart-icon"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <use class="icon-red" href="${heartIconUrl}"></use>
-          </svg>
-        </button>
+      <button
+        class="fav-item__heart is-favorite"
+        type="button"
+        data-key="${key}"
+        aria-pressed="true"
+        aria-label="Remove from favorites"
+      >
+        <svg class="fav-item__heart-svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <use href="${heartUrl}#heart-filled" width="16" height="16" />
+        </svg>
+      </button>
     </li>`;
 }
 
@@ -175,7 +181,7 @@ export function favoriteItemHTML(book) {
 
 /**
  * Toggle aria attributes and .is-favorite class on a card's heart button.
- * CSS transitions handle the color change automatically.
+ * Unfavorited: gray stroke-only <img>; favorited: <use href="#heart-filled"> (CSS cross-fade).
  *
  * @param {HTMLElement} grid
  * @param {string}      key   Open Library key (e.g. "/works/OL45804W")

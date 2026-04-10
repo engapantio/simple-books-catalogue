@@ -41,11 +41,11 @@ export function renderFavorites(refs, onRemoved) {
   // minimises reflows compared to appending one element at a time.
   list.innerHTML = favorites.map(favoriteItemHTML).join('');
 
-  list.querySelectorAll('.fav-item__remove').forEach(btn => {
+  list.querySelectorAll('.fav-item__heart').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.key;
       removeFavorite(key);
-      renderFavorites(refs, onRemoved); // re-render the panel
+      renderFavorites(refs, onRemoved);
       onRemoved?.(key);
     });
   });
@@ -62,7 +62,7 @@ export function renderFavorites(refs, onRemoved) {
 export function toggleFavorite(book, refs, onSync) {
   const wasFav = isFavorite(book.key);
 
-  wasFav ?removeFavorite(book.key) : addFavorite(book);
+  wasFav ? removeFavorite(book.key) : addFavorite(book);
 
   renderFavorites(refs, onSync);
   onSync?.(book.key);

@@ -6,7 +6,14 @@
 import '../styles/main.css';
 
 import { searchBooks } from './api.js';
-import { bookCardHTML, noCoverHTML, syncCardFavButton, showState, clearState } from './ui.js';
+import {
+  bookCardHTML,
+  noCoverHTML,
+  syncCardFavButton,
+  showState,
+  clearState,
+  favoritesHeaderMarkInnerHTML,
+} from './ui.js';
 import { renderFavorites, toggleFavorite } from './favorites.js';
 import { initTheme } from './theme.js';
 import { debounce } from '../utils/helpers.js';
@@ -25,6 +32,9 @@ const favBadge         = document.getElementById('favBadge');
 const favMobileBtn     = document.getElementById('favMobileBtn');
 const favoritesSidebar = document.getElementById('favoritesSidebar');
 const themeBtn         = document.getElementById('themeBtn');
+const heroWrapper      = document.querySelector('.hero .wrapper');
+const searchBarGroup   = document.querySelector('.search-bar-group');
+const contentLayout    = document.querySelector('.content-layout');
 
 /* Grouped refs for the favorites panel */
 const favRefs = {
@@ -38,10 +48,44 @@ const favRefs = {
 /** Books from the last successful API call (used by author filter) */
 let currentBooks = [];
 
+/** Visible result cap by layout band: mobile 10, tablet 6, desktop 10 */
+function getSearchResultsCap() {
+  const w = window.innerWidth;
+  if (w >= 1220) return 10;
+  if (w >= 768) return 6;
+  return 10;
+}
+
 /* ── Init ────────────────────────────────────────────────────── */
 
 // Apply saved theme
 initTheme(themeBtn);
+
+/**
+ * Mobile: keep favorites above the search bar in the hero.
+ * Tablet/desktop: sidebar beside results inside `.content-layout`.
+ */
+function placeFavoritesPanel() {
+  if (!favoritesSidebar || !heroWrapper || !contentLayout || !searchBarGroup) return;
+
+  if (window.innerWidth < 768) {
+    if (favoritesSidebar.parentElement !== heroWrapper) {
+      heroWrapper.insertBefore(favoritesSidebar, searchBarGroup);
+    }
+  } else {
+    if (favoritesSidebar.parentElement !== contentLayout) {
+      contentLayout.appendChild(favoritesSidebar);
+    }
+    favoritesSidebar.classList.remove('favorites--open');
+    favMobileBtn?.setAttribute('aria-expanded', 'false');
+    favMobileBtn?.setAttribute('aria-label', 'Show favorites');
+  }
+}
+
+placeFavoritesPanel();
+
+const favHeaderMark = document.getElementById('favHeaderMark');
+if (favHeaderMark) favHeaderMark.innerHTML = favoritesHeaderMarkInnerHTML();
 
 // Restore favorites from localStorage
 renderFavorites(favRefs, key => syncCardFavButton(booksGrid, key));
@@ -127,13 +171,39 @@ async function performSearch(query) {
 }
 
 /**
-* Build all book cards as one HTML string and inject into the grid.
- * The delegated listener above handles subsequent click events.
+ * Build book cards for the grid (capped per mobile / tablet / desktop band).
  *
  * @param {Array} books
  */
 function renderBookList(books) {
-booksGrid.innerHTML = books.map(bookCardHTML).join('');
+  const cap = getSearchResultsCap();
+  const visible = books.slice(0, cap);
+  booksGrid.innerHTML = visible.map(bookCardHTML).join('');
+}
+
+/**
+ * Re-apply author filter (if any) and grid cap — used after resize crossing bands.
+ */
+function updateBooksGridFromState() {
+  if (!currentBooks.length) return;
+
+  const filter = authorInput.value.trim().toLowerCase();
+  if (!filter) {
+    renderBookList(currentBooks);
+    return;
+  }
+
+  const filtered = currentBooks.filter(b =>
+    b.author_name?.some(author => author.toLowerCase().includes(filter))
+  );
+
+  if (filtered.length === 0) {
+    booksGrid.innerHTML = `<p class="filter-empty">
+      No books by "${authorInput.value}" in these results.
+    </p>`;
+  } else {
+    renderBookList(filtered);
+  }
 }
 
 /* ── Event listeners ─────────────────────────────────────────── */
@@ -154,26 +224,13 @@ searchInput.addEventListener('keydown', e => {
 });
 
 // Author filter (client-side, no API call)
-authorInput.addEventListener('input', () => {
-  const filter = authorInput.value.trim().toLowerCase();
+authorInput.addEventListener('input', () => updateBooksGridFromState());
 
-  if (!filter) {
-    renderBookList(currentBooks);
-    return;
-  }
-
-  const filtered = currentBooks.filter(b =>
-    b.author_name?.some(author => author.toLowerCase().includes(filter))
-  );
-
-  if (filtered.length === 0) {
-    booksGrid.innerHTML = `<p class="filter-empty">
-      No books by "${authorInput.value}" in these results.
-    </p>`;
-  } else {
-    renderBookList(filtered);
-  }
-});
+const debouncedLayoutReflow = debounce(() => {
+  placeFavoritesPanel();
+  updateBooksGridFromState();
+}, 200);
+window.addEventListener('resize', debouncedLayoutReflow);
 
 // Mobile favorites toggle
 favMobileBtn?.addEventListener('click', () => {

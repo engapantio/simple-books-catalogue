@@ -5,7 +5,7 @@
 
 const BASE_URL = 'https://openlibrary.org';
 const COVERS_URL = 'https://covers.openlibrary.org/b/id';
-const LIMIT = 20; // max results per search
+const LIMIT = 10; // max results per search
 
 /**
  * Search books by a free-text query (title / author / keyword).
@@ -27,7 +27,8 @@ export async function searchBooks(query) {
   }
 
   const data = await res.json();
-  return Array.isArray(data.docs) ? data.docs : [];
+  const docs = Array.isArray(data.docs) ? data.docs : [];
+  return docs.slice(0, LIMIT);
 }
 
 /**
