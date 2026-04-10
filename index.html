@@ -29,8 +29,11 @@
         <!-- Mobile: show/hide favorites panel -->
         <button class="fav-mobile-btn" id="favMobileBtn"
                 aria-label="Show favorites" aria-expanded="false">
-          <img src="/simple-books-catalogue/assets/heart.svg" alt="" width="16" height="16"
-               aria-hidden="true" />
+          <span class="fav-mobile-btn__hearts" aria-hidden="true">
+            <img class="fav-mobile-btn__img" src="/simple-books-catalogue/assets/heart.svg" alt=""
+                 width="16" height="16" />
+            <span class="fav-mobile-btn__heart-filled"></span>
+          </span>
           <span class="fav-mobile-btn__badge" id="favBadge">0</span>
         </button>
 
@@ -48,21 +51,41 @@
     <div class="wrapper">
       <h1 class="hero__title" id="heroHeading">Discover Your Next Great Read</h1>
       <p class="hero__subtitle">
-        Search millions of books, build your personal library,
-        and never lose track of what to read next.
+        <span class="hero__subtitle-lead">Search millions of books, build your personal library, and never lose track of</span><br />
+        what to read next.
       </p>
 
-      <div class="search-bar" role="search">
-        <img class="search-bar__icon" src="/simple-books-catalogue/assets/search.svg"
-             alt="" aria-hidden="true" width="20" height="20" />
-        <input
-          type="search"
-          id="searchInput"
-          class="search-bar__input"
-          placeholder="Search by title, author or keyword…"
-          aria-label="Search for books"
-          autocomplete="off"
-        />
+        <!-- Favorites: mobile = above search (in hero); ≥768px moved into .content-layout by main.js -->
+        <aside class="favorites" id="favoritesSidebar" aria-label="Favorites">
+          <div class="favorites__panel">
+            <div class="favorites__header">
+              <span class="favorites__header-mark" id="favHeaderMark" aria-hidden="true"></span>
+              <div class="favorites__header-text">
+                <h2 class="favorites__title">Favorites</h2>
+                <p class="favorites__count" id="favCount">0 books saved</p>
+              </div>
+            </div>
+            <ul class="favorites__list" id="favoritesList"
+                aria-label="Favorited books"></ul>
+            <p class="favorites__empty" id="favEmpty">
+              No favorites yet.<br />Click the heart on any book to save it.
+            </p>
+          </div>
+        </aside>
+
+      <div class="search-bar-group" role="search">
+        <div class="search-bar">
+          <img class="search-bar__icon" src="/simple-books-catalogue/assets/search.svg"
+               alt="" aria-hidden="true" width="20" height="20" />
+          <input
+            type="search"
+            id="searchInput"
+            class="search-bar__input"
+            placeholder="Search for books by title or author…"
+            aria-label="Search for books"
+            autocomplete="off"
+          />
+        </div>
         <button class="search-bar__btn" id="searchBtn" type="button">Search</button>
       </div>
 
@@ -93,23 +116,6 @@
           <div class="state-msg" id="stateMsg" role="status"></div>
           <ul class="books-grid" id="booksGrid"></ul>
         </section>
-
-        <!-- Favorites sidebar -->
-        <aside class="favorites" id="favoritesSidebar" aria-label="Favorites">
-          <div class="favorites__panel">
-            <div class="favorites__header">
-              <img src="/simple-books-catalogue/assets/heart.svg" alt="" aria-hidden="true"
-                   class="favorites__header-icon" width="16" height="16" />
-              <h2 class="favorites__title">Favorites</h2>
-            </div>
-            <p class="favorites__count" id="favCount">0 books saved</p>
-            <ul class="favorites__list" id="favoritesList"
-                aria-label="Favorited books"></ul>
-            <p class="favorites__empty" id="favEmpty">
-              No favorites yet.<br />Click the heart on any book to save it.
-            </p>
-          </div>
-        </aside>
 
       </div>
     </div>
