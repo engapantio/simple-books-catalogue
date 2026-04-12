@@ -1,10 +1,7 @@
 import { defineConfig } from 'vite';
 
-/**
- * Vite configuration.
- * Final build: dist/index.html + dist/assets/{main.js, main.css, *.svg}
- * base './' makes all paths relative — works on GitHub Pages and local serving.
- */
+// Deployed under /simple-books-catalogue/ on GitHub Pages.
+// assetsInlineLimit: 0 keeps SVG imports as real files in dist.
 export default defineConfig({
   base: '/simple-books-catalogue/',
 
@@ -21,7 +18,6 @@ export default defineConfig({
         },
       },
     },
-    // Never inline assets → keeps SVGs as real files in dist/assets/
     assetsInlineLimit: 0,
   },
 });

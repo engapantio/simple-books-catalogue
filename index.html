@@ -10,63 +10,58 @@
 </head>
 <body>
 
-  <!-- HEADER -->
   <header class="header">
-    <div class="header__inner wrapper">
+    <div class="header-inner wrapper">
 
-      <a class="header__brand" href="." aria-label="The Library — home">
-        <div class="header__logo" aria-hidden="true">
+      <a class="header-brand" href="." aria-label="The Library — home">
+        <div class="header-logo" aria-hidden="true">
           <img src="/src/assets/book.svg" alt="" width="24" height="24" />
         </div>
-        <div class="header__brand-text">
-          <span class="header__brand-name">The Library</span>
-          <span class="header__brand-tagline">Discover your next favorite book</span>
+        <div class="header-brand-text">
+          <span class="header-brand-name">The Library</span>
+          <span class="header-brand-tagline">Discover your next favorite book</span>
         </div>
       </a>
 
-      <div class="header__actions">
-        <!-- Mobile: show/hide favorites panel -->
+      <div class="header-actions">
         <button class="fav-mobile-btn" id="favMobileBtn"
                 aria-label="Show favorites" aria-expanded="false">
-          <span class="fav-mobile-btn__hearts" aria-hidden="true">
-            <img class="fav-mobile-btn__img" src="/src/assets/heart.svg" alt=""
+          <span class="fav-mobile-btn-hearts" aria-hidden="true">
+            <img class="fav-mobile-btn-img" src="/src/assets/heart.svg" alt=""
                  width="16" height="16" />
-            <span class="fav-mobile-btn__heart-filled"></span>
+            <span class="fav-mobile-btn-heart-filled"></span>
           </span>
-          <span class="fav-mobile-btn__badge" id="favBadge">0</span>
+          <span class="fav-mobile-btn-badge" id="favBadge">0</span>
         </button>
 
-        <!-- Light / dark toggle -->
         <button class="theme-btn" id="themeBtn" aria-label="Switch to dark theme">
-          <span class="theme-btn__icon" aria-hidden="true">☀️</span>
+          <span class="theme-btn-icon" aria-hidden="true">☀️</span>
         </button>
       </div>
 
     </div>
   </header>
 
-  <!-- HERO / SEARCH -->
   <section class="hero" aria-labelledby="heroHeading">
     <div class="wrapper">
-      <h1 class="hero__title" id="heroHeading">Discover Your Next Great Read</h1>
-      <p class="hero__subtitle">
-        <span class="hero__subtitle-lead">Search millions of books, build your personal library, and never lose track of</span><br />
+      <h1 class="hero-title" id="heroHeading">Discover Your Next Great Read</h1>
+      <p class="hero-subtitle">
+        <span class="hero-subtitle-lead">Search millions of books, build your personal library, and never lose track of</span><br />
         what to read next.
       </p>
 
-        <!-- Favorites: mobile = above search (in hero); ≥768px moved into .content-layout by main.js -->
         <aside class="favorites" id="favoritesSidebar" aria-label="Favorites">
-          <div class="favorites__panel">
-            <div class="favorites__header">
-              <span class="favorites__header-mark" id="favHeaderMark" aria-hidden="true"></span>
-              <div class="favorites__header-text">
-                <h2 class="favorites__title">Favorites</h2>
-                <p class="favorites__count" id="favCount">0 books saved</p>
+          <div class="favorites-panel">
+            <div class="favorites-header">
+              <span class="favorites-header-mark" id="favHeaderMark" aria-hidden="true"></span>
+              <div class="favorites-header-text">
+                <h2 class="favorites-title">Favorites</h2>
+                <p class="favorites-count" id="favCount">0 books saved</p>
               </div>
             </div>
-            <ul class="favorites__list" id="favoritesList"
+            <ul class="favorites-list" id="favoritesList"
                 aria-label="Favorited books"></ul>
-            <p class="favorites__empty" id="favEmpty">
+            <p class="favorites-empty" id="favEmpty">
               No favorites yet.<br />Click the heart on any book to save it.
             </p>
           </div>
@@ -74,27 +69,26 @@
 
       <div class="search-bar-group" role="search">
         <div class="search-bar">
-          <img class="search-bar__icon" src="/src/assets/search.svg"
+          <img class="search-bar-icon" src="/src/assets/search.svg"
                alt="" aria-hidden="true" width="20" height="20" />
           <input
             type="search"
             id="searchInput"
-            class="search-bar__input"
+            class="search-bar-input"
             placeholder="Search for books by title or author…"
             aria-label="Search for books"
             autocomplete="off"
           />
         </div>
-        <button class="search-bar__btn" id="searchBtn" type="button">Search</button>
+        <button class="search-bar-btn" id="searchBtn" type="button">Search</button>
       </div>
 
-      <!-- Author filter — revealed after first search -->
       <div class="author-filter" id="authorFilter" hidden>
-        <label for="authorInput" class="author-filter__label">Filter by author:</label>
+        <label for="authorInput" class="author-filter-label">Filter by author:</label>
         <input
           type="text"
           id="authorInput"
-          class="author-filter__input"
+          class="author-filter-input"
           placeholder="e.g. Rowling"
           aria-label="Filter results by author"
           autocomplete="off"
@@ -103,12 +97,10 @@
     </div>
   </section>
 
-  <!-- MAIN -->
   <main class="main" id="main">
     <div class="wrapper">
       <div class="content-layout">
 
-        <!-- Search results -->
         <section class="results" id="results"
                  aria-label="Search results"
                  aria-live="polite" aria-atomic="false">
@@ -120,9 +112,8 @@
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="footer">
-    <div class="wrapper footer__inner">
+    <div class="wrapper footer-inner">
       Powered by
       <a href="https://openlibrary.org" target="_blank"
          rel="noopener noreferrer">Open Library</a>

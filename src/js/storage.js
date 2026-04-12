@@ -1,16 +1,10 @@
-/**
- * storage.js
- * Abstracts all localStorage reads and writes.
- * Centralising storage keys prevents key collisions.
- */
+// Namespaced keys so we don't step on other scripts sharing this origin.
 
-const FAVORITES_KEY = 'tl_favorites'; // JSON array of book objects
-const THEME_KEY = 'tl_theme'; // 'light' | 'dark'
+const FAVORITES_KEY = 'tl_favorites';
+const THEME_KEY = 'tl_theme';
 
-/* ── Favorites ─────────────────────────────────────────────── */
-
-/** @returns {Array} */
 export function getFavorites() {
+  // Bad JSON (hand-edited storage, etc.) -> empty list.
   try {
     return JSON.parse(localStorage.getItem(FAVORITES_KEY)) ?? [];
   } catch {
@@ -18,12 +12,10 @@ export function getFavorites() {
   }
 }
 
-/** @param {Array} favorites */
 function saveFavorites(favorites) {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
 }
 
-/** Add a book (not if already saved). */
 export function addFavorite(book) {
   const list = getFavorites();
   if (!list.find(b => b.key === book.key)) {
@@ -33,26 +25,20 @@ export function addFavorite(book) {
   return getFavorites();
 }
 
-/** Remove a book by its Open Library key. */
 export function removeFavorite(key) {
   const updated = getFavorites().filter(b => b.key !== key);
   saveFavorites(updated);
   return updated;
 }
 
-/** @returns {boolean} */
 export function isFavorite(key) {
   return getFavorites().some(b => b.key === key);
 }
 
-/* ── Theme ─────────────────────────────────────────────────── */
-
-/** @returns {'light'|'dark'} */
 export function getSavedTheme() {
   return localStorage.getItem(THEME_KEY) || 'light';
 }
 
-/** @param {'light'|'dark'} theme */
 export function saveTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
 }

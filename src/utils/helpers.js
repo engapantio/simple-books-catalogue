@@ -1,12 +1,5 @@
-/**
- * Debounce — delays `fn` execution until `delay` ms have passed
- * since the last call. Used for on-the-fly search to avoid an API
- * request on every keystroke.
- *
- * @param {Function} fn
- * @param {number}   delay  Milliseconds
- * @returns {Function}
- */
+// Call fn once after things go quiet for `delay` ms (resets on every call).
+
 export function debounce(fn, delay) {
   let timer = null;
   return (...args) => {

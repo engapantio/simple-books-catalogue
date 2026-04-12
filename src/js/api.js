@@ -1,19 +1,9 @@
-/**
- * api.js
- * All Open Library API communication.
- */
+// Open Library: trim fields so responses stay small; we only render these props.
 
 const BASE_URL = 'https://openlibrary.org';
 const COVERS_URL = 'https://covers.openlibrary.org/b/id';
-const LIMIT = 10; // max results per search
+const LIMIT = 10;
 
-/**
- * Search books by a free-text query (title / author / keyword).
- * Endpoint: GET /search.json?q={query}&fields=...
- *
- * @param {string} query
- * @returns {Promise<Array>}  Array of book doc objects from the API.
- */
 export async function searchBooks(query) {
   const q = query.trim();
   if (!q) throw new Error('Empty query');
@@ -31,12 +21,6 @@ export async function searchBooks(query) {
   return docs.slice(0, LIMIT);
 }
 
-/**
- * Build the URL for a book cover image.
- * @param {number|null} coverId  The cover_i field from the API.
- * @param {'S'|'M'|'L'} size
- * @returns {string|null}
- */
 export function getCoverUrl(coverId, size = 'M') {
   return coverId ? `${COVERS_URL}/${coverId}-${size}.jpg` : null;
 }

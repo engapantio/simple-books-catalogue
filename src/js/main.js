@@ -1,7 +1,4 @@
-/**
- * main.js — Application entry point.
- * Wires up DOM, search, author filter, favorites, theme, and mobile toggle.
- */
+// Books catalogue: search, favorites, theme, and responsive favorites placement.
 
 import '../styles/main.css';
 
@@ -13,12 +10,12 @@ import {
   showState,
   clearState,
   favoritesHeaderMarkInnerHTML,
+  escapeHtml,
 } from './ui.js';
 import { renderFavorites, toggleFavorite } from './favorites.js';
 import { initTheme } from './theme.js';
 import { debounce } from '../utils/helpers.js';
 
-/* ── DOM refs ────────────────────────────────────────────────── */
 const searchInput      = document.getElementById('searchInput');
 const searchBtn        = document.getElementById('searchBtn');
 const booksGrid        = document.getElementById('booksGrid');
@@ -36,7 +33,6 @@ const heroWrapper      = document.querySelector('.hero .wrapper');
 const searchBarGroup   = document.querySelector('.search-bar-group');
 const contentLayout    = document.querySelector('.content-layout');
 
-/* Grouped refs for the favorites panel */
 const favRefs = {
   list: favoritesList,
   count: favCount,
@@ -44,30 +40,23 @@ const favRefs = {
   badge: favBadge
 };
 
-/* ── State ───────────────────────────────────────────────────── */
-/** Books from the last successful API call (used by author filter) */
+// Last batch from Open Library; author filter only narrows this (no second request).
 let currentBooks = [];
 
-/** Visible result cap by layout band: mobile 10, tablet 6, desktop 10 */
 function getSearchResultsCap() {
+  // Tablet (768–1279px) is tighter than desktop (1280px+), so fewer cards there.
   const w = window.innerWidth;
-  if (w >= 1220) return 10;
+  if (w >= 1280) return 10;
   if (w >= 768) return 6;
   return 10;
 }
 
-/* ── Init ────────────────────────────────────────────────────── */
-
-// Apply saved theme
 initTheme(themeBtn);
 
-/**
- * Mobile: keep favorites above the search bar in the hero.
- * Tablet/desktop: sidebar beside results inside `.content-layout`.
- */
 function placeFavoritesPanel() {
   if (!favoritesSidebar || !heroWrapper || !contentLayout || !searchBarGroup) return;
 
+  // One aside node: park it in the hero on small screens, next to results on wider ones.
   if (window.innerWidth < 768) {
     if (favoritesSidebar.parentElement !== heroWrapper) {
       heroWrapper.insertBefore(favoritesSidebar, searchBarGroup);
@@ -76,7 +65,7 @@ function placeFavoritesPanel() {
     if (favoritesSidebar.parentElement !== contentLayout) {
       contentLayout.appendChild(favoritesSidebar);
     }
-    favoritesSidebar.classList.remove('favorites--open');
+    favoritesSidebar.classList.remove('favorites-open');
     favMobileBtn?.setAttribute('aria-expanded', 'false');
     favMobileBtn?.setAttribute('aria-label', 'Show favorites');
   }
@@ -87,17 +76,13 @@ placeFavoritesPanel();
 const favHeaderMark = document.getElementById('favHeaderMark');
 if (favHeaderMark) favHeaderMark.innerHTML = favoritesHeaderMarkInnerHTML();
 
-// Restore favorites from localStorage
 renderFavorites(favRefs, key => syncCardFavButton(booksGrid, key));
 
-// Show hint on first load
 showState(stateMsg, 'info', 'Enter a search query to find books.');
 
-/* ── Delegated heart-button listener (set up once) ───────────── */
-// Handles clicks on .book-card__fav-btn regardless of how often the
-// grid is re-rendered, because the listener lives on the stable container.
+// Delegation: the grid's children are rebuilt on every search.
 booksGrid.addEventListener('click', e => {
-  const favBtn =  e.target.closest('.book-card__fav-btn');
+  const favBtn = e.target.closest('.book-card-fav-btn');
   if (!favBtn) return;
 
   e.stopPropagation();
@@ -109,29 +94,23 @@ booksGrid.addEventListener('click', e => {
   }
 });
 
-/* ── Cover image error handler (capture phase) ───────────────── */
-// 'error' does not bubble, so we use capture (third argument = true).
-// When an Open Library cover image fails to load, swap it for noCoverHTML().
+// Broken cover URLs: "error" doesn't bubble, so listen on the grid with capture.
 booksGrid.addEventListener('error', e => {
   const img = e.target;
-  if (!img.classList.contains('book-card__cover')) return;
+  if (!img.classList.contains('book-card-cover')) return;
 
-  const wrap = img.closest('.book-card__cover-wrap');
+  const wrap = img.closest('.book-card-cover-wrap');
   if (wrap) {
     img.remove();
-    // Insert placeholder before the heart button
     wrap.insertAdjacentHTML('afterbegin', noCoverHTML());
   }
 }, true);
 
-/* ── Search ──────────────────────────────────────────────────── */
+// Each new search bumps this; if an older request finishes late, we ignore it.
+let searchSeq = 0;
 
-/**
- * Fetch books from Open Library and render them.
- *
- * @param {string} query
- */
 async function performSearch(query) {
+  const mySeq = ++searchSeq;
   const q = query.trim();
 
   if (!q) {
@@ -142,7 +121,6 @@ async function performSearch(query) {
     return;
   }
 
-  // Loading state
   showState(stateMsg, 'loading', 'Loading…');
   booksGrid.innerHTML = '';
   authorFilter.hidden = true;
@@ -150,6 +128,8 @@ async function performSearch(query) {
 
   try {
     const books = await searchBooks(q);
+    if (mySeq !== searchSeq) return;
+
     currentBooks = books;
 
     if (books.length === 0) {
@@ -164,26 +144,92 @@ async function performSearch(query) {
     authorInput.value   = '';
 
   } catch (err) {
+    if (mySeq !== searchSeq) return;
     console.error('Search error:', err);
     showState(stateMsg, 'error',
       'Network error. Please check your connection and try again.');
   }
 }
 
-/**
- * Build book cards for the grid (capped per mobile / tablet / desktop band).
- *
- * @param {Array} books
- */
+function bookCardsByVisualRow(cards) {
+  if (!cards.length) return [];
+  const sorted = [...cards].sort(
+    (a, b) =>
+      a.getBoundingClientRect().top - b.getBoundingClientRect().top ||
+      a.getBoundingClientRect().left - b.getBoundingClientRect().left
+  );
+  const rows = [];
+  let row = [sorted[0]];
+  let rowTop = sorted[0].getBoundingClientRect().top;
+  for (let i = 1; i < sorted.length; i++) {
+    const c = sorted[i];
+    const t = c.getBoundingClientRect().top;
+    if (Math.abs(t - rowTop) < 8) row.push(c);
+    else {
+      rows.push(row);
+      row = [c];
+      rowTop = t;
+    }
+  }
+  rows.push(row);
+  return rows;
+}
+
+function titleNeedsTwoLines(titleEl) {
+  const w = titleEl.getBoundingClientRect().width;
+  if (w < 4) return false;
+
+  const clone = titleEl.cloneNode(true);
+  clone.className = titleEl.className;
+  clone.style.cssText = [
+    'position:absolute',
+    'left:-9999px',
+    'top:0',
+    `width:${w}px`,
+    'min-height:0',
+    'height:auto',
+    'max-height:none',
+    'display:block',
+    'overflow:visible',
+    '-webkit-line-clamp:unset',
+    'line-clamp:unset',
+    '-webkit-box-orient:unset',
+  ].join(';');
+  document.body.appendChild(clone);
+  const fullH = clone.scrollHeight;
+  document.body.removeChild(clone);
+
+  const cs = getComputedStyle(titleEl);
+  let lh = parseFloat(cs.lineHeight);
+  if (!Number.isFinite(lh)) lh = parseFloat(cs.fontSize) * 1.3;
+  return fullH > lh * 1.45;
+}
+
+function syncBookCardTitleRowHeights() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const cards = [...booksGrid.querySelectorAll('.book-card')];
+      cards.forEach(c => c.classList.remove('book-card-tall-title-row'));
+      if (!cards.length) return;
+
+      for (const row of bookCardsByVisualRow(cards)) {
+        const anyTwo = row.some(card => {
+          const t = card.querySelector('.book-card-title');
+          return t && titleNeedsTwoLines(t);
+        });
+        if (anyTwo) row.forEach(c => c.classList.add('book-card-tall-title-row'));
+      }
+    });
+  });
+}
+
 function renderBookList(books) {
   const cap = getSearchResultsCap();
   const visible = books.slice(0, cap);
   booksGrid.innerHTML = visible.map(bookCardHTML).join('');
+  syncBookCardTitleRowHeights();
 }
 
-/**
- * Re-apply author filter (if any) and grid cap — used after resize crossing bands.
- */
 function updateBooksGridFromState() {
   if (!currentBooks.length) return;
 
@@ -198,24 +244,21 @@ function updateBooksGridFromState() {
   );
 
   if (filtered.length === 0) {
-    booksGrid.innerHTML = `<p class="filter-empty">
-      No books by "${authorInput.value}" in these results.
-    </p>`;
+    // User-typed text ends up in HTML — escape it like any other untrusted string.
+    const safe = escapeHtml(authorInput.value);
+    booksGrid.innerHTML =
+      `<p class="filter-empty">No books by "${safe}" in these results.</p>`;
   } else {
     renderBookList(filtered);
   }
 }
 
-/* ── Event listeners ─────────────────────────────────────────── */
-
-// Debounced on-the-fly search (fires 1000 ms after typing stops)
+// Don’t call the API on every keypress; wait until typing pauses.
 const debouncedSearch = debounce(value => performSearch(value), 1000);
 searchInput.addEventListener('input', e => debouncedSearch(e.target.value));
 
-// Find button — immediate search
 searchBtn.addEventListener('click', () => performSearch(searchInput.value));
 
-// Enter key inside search field
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -223,18 +266,17 @@ searchInput.addEventListener('keydown', e => {
   }
 });
 
-// Author filter (client-side, no API call)
 authorInput.addEventListener('input', () => updateBooksGridFromState());
 
+// Resize can change how many cards we show or where the sidebar sits.
 const debouncedLayoutReflow = debounce(() => {
   placeFavoritesPanel();
   updateBooksGridFromState();
 }, 200);
 window.addEventListener('resize', debouncedLayoutReflow);
 
-// Mobile favorites toggle
 favMobileBtn?.addEventListener('click', () => {
-  const open = favoritesSidebar.classList.toggle('favorites--open');
+  const open = favoritesSidebar.classList.toggle('favorites-open');
   favMobileBtn.setAttribute('aria-expanded', String(open));
   favMobileBtn.setAttribute('aria-label', open ? 'Hide favorites' : 'Show favorites');
 });

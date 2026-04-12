@@ -1,17 +1,11 @@
-/**
- * theme.js
- * Light / dark theme management.
- */
+// data-theme on <html> drives the palette in main.css; optional button updates icon + aria.
 
 import { getSavedTheme, saveTheme } from './storage.js';
 
-/**
- * Read saved preference, apply it immediately, then wire up the toggle.
- *
- * @param {HTMLButtonElement}  The theme toggle button.
- */
 export function initTheme(btn) {
   applyTheme(getSavedTheme(), btn);
+
+  if (!btn) return;
 
   btn.addEventListener('click', () => {
     const current =
@@ -25,7 +19,9 @@ export function initTheme(btn) {
 function applyTheme(theme, btn) {
   document.documentElement.setAttribute('data-theme', theme);
 
-  const icon = btn.querySelector('.theme-btn__icon');
+  if (!btn) return;
+
+  const icon = btn.querySelector('.theme-btn-icon');
   if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
 
   btn.setAttribute(
