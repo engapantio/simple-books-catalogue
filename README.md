@@ -30,6 +30,8 @@ npm run preview
 ```
 
 The final build (`dist/`) contains exactly:
+
+```text
 dist/
 ├── index.html
 ├── main.js
@@ -38,6 +40,7 @@ dist/
     ├── book.svg
     ├── heart.svg
     └── search.svg
+```
 
 ### Deploy to GitHub Pages
 
