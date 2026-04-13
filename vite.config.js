@@ -9,12 +9,12 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/main.js',
+        entryFileNames: 'main.js',
         chunkFileNames: 'assets/[name].js',
         assetFileNames: info => {
           if (info.name?.endsWith('.svg')) return 'assets/[name][extname]';
-          if (info.name?.endsWith('.css')) return 'assets/main.css';
-          return 'assets/[name][extname]';
+          if (info.name?.endsWith('.css')) return 'main.css';
+          return '[name][extname]';
         },
       },
     },

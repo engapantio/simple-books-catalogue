@@ -27,6 +27,33 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify strict dist structure
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          expected_root=("assets" "index.html" "main.css" "main.js")
+          mapfile -t actual_root < <(ls -1 dist | sort)
+          mapfile -t expected_root_sorted < <(printf "%s\n" "${expected_root[@]}" | sort)
+
+          if [[ "${actual_root[*]}" != "${expected_root_sorted[*]}" ]]; then
+            echo "Unexpected dist root contents."
+            echo "Expected: ${expected_root_sorted[*]}"
+            echo "Actual:   ${actual_root[*]}"
+            exit 1
+          fi
+
+          expected_assets=("book.svg" "heart.svg" "search.svg")
+          mapfile -t actual_assets < <(ls -1 dist/assets | sort)
+          mapfile -t expected_assets_sorted < <(printf "%s\n" "${expected_assets[@]}" | sort)
+
+          if [[ "${actual_assets[*]}" != "${expected_assets_sorted[*]}" ]]; then
+            echo "Unexpected dist/assets contents."
+            echo "Expected: ${expected_assets_sorted[*]}"
+            echo "Actual:   ${actual_assets[*]}"
+            exit 1
+          fi
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

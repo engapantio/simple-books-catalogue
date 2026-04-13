@@ -32,14 +32,12 @@ npm run preview
 The final build (`dist/`) contains exactly:
 dist/
 ├── index.html
-└── assets/
 ├── main.js
 ├── main.css
-├── book.svg
-├── heart.svg
-└── search.svg
-
-text
+└── assets/
+    ├── book.svg
+    ├── heart.svg
+    └── search.svg
 
 ### Deploy to GitHub Pages
 
@@ -77,7 +75,7 @@ to the `gh-pages` branch automatically.
 ## Features
 
 - 🔍 Search by title, author or keyword (Open Library API)
-- ⚡ Debounced on-the-fly search (1000 ms) + manual Find button
+- ⚡ Debounced on-the-fly search (1000 ms) + manual Search button
 - 👤 Client-side author filter on search results
 - ❤️ Add / remove favorites — persisted in `localStorage`
 - 🌙 Light / dark theme toggle — preference saved across sessions
